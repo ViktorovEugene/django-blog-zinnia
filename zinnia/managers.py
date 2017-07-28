@@ -4,10 +4,15 @@ from django.utils import timezone
 from django.contrib.sites.models import Site
 
 from zinnia.settings import SEARCH_FIELDS
+from zinnia.middleware.zinnia_app import get_current_apps
 
 DRAFT = 0
 HIDDEN = 1
 PUBLISHED = 2
+
+PRESS = 'press'
+BLOG = 'blog'
+APPS = (PRESS, BLOG)
 
 
 def tags_published():
@@ -27,12 +32,16 @@ def entries_published(queryset):
     Return only the entries published.
     """
     now = timezone.now()
+    optional_filters = {}
+    current_apps = get_current_apps()
+    if current_apps:
+        optional_filters['app__in'] = current_apps
     return queryset.filter(
         models.Q(start_publication__lte=now) |
         models.Q(start_publication=None),
         models.Q(end_publication__gt=now) |
         models.Q(end_publication=None),
-        status=PUBLISHED, sites=Site.objects.get_current())
+        status=PUBLISHED, sites=Site.objects.get_current(), **optional_filters)
 
 
 class EntryPublishedManager(models.Manager):
@@ -97,6 +106,10 @@ class EntryRelatedPublishedManager(models.Manager):
         Return a queryset containing published entries.
         """
         now = timezone.now()
+        optional_filters = {}
+        current_apps = get_current_apps()
+        if current_apps:
+            optional_filters['entries__app__in'] = current_apps
         return super(
             EntryRelatedPublishedManager, self).get_queryset().filter(
             models.Q(entries__start_publication__lte=now) |
@@ -104,5 +117,6 @@ class EntryRelatedPublishedManager(models.Manager):
             models.Q(entries__end_publication__gt=now) |
             models.Q(entries__end_publication=None),
             entries__status=PUBLISHED,
-            entries__sites=Site.objects.get_current()
+            entries__sites=Site.objects.get_current(),
+            **optional_filters
             ).distinct()

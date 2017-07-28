@@ -29,7 +29,7 @@ from zinnia.settings import AUTO_CLOSE_PINGBACKS_AFTER
 from zinnia.settings import AUTO_CLOSE_TRACKBACKS_AFTER
 from zinnia.managers import entries_published
 from zinnia.managers import EntryPublishedManager
-from zinnia.managers import DRAFT, HIDDEN, PUBLISHED
+from zinnia.managers import DRAFT, HIDDEN, PUBLISHED, PRESS, BLOG, APPS
 from zinnia.url_shortener import get_url_shortener
 
 
@@ -44,6 +44,10 @@ class CoreEntry(models.Model):
                       (HIDDEN, _('hidden')),
                       (PUBLISHED, _('published')))
 
+    APP_CHOICES = (('', '-----'),
+                   (PRESS, _('Press')),
+                   (BLOG, _('Blog')))
+
     title = models.CharField(
         _('title'), max_length=255)
 
@@ -55,6 +59,12 @@ class CoreEntry(models.Model):
     status = models.IntegerField(
         _('status'), db_index=True,
         choices=STATUS_CHOICES, default=DRAFT)
+
+    app = models.CharField(
+        _('application'), db_index=True,
+        choices=APP_CHOICES, default='', blank=True,
+        max_length=max(len(i) for i in next(zip(*APP_CHOICES)))
+    )
 
     publication_date = models.DateTimeField(
         _('publication date'),
