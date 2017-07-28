@@ -4,6 +4,7 @@ from django.utils import timezone
 from django.contrib.sites.models import Site
 
 from zinnia.settings import SEARCH_FIELDS
+from django.utils.translation import get_language
 
 DRAFT = 0
 HIDDEN = 1
@@ -22,20 +23,30 @@ def tags_published():
     return Tag.objects.filter(name__in=[t.name for t in tags_entry_published])
 
 
-def entries_published(queryset):
+# The argument to use the language of current thread .
+CURRENT_LANGUAGE = 'current-language'
+
+
+def entries_published(queryset, language=CURRENT_LANGUAGE):
     """
     Return only the entries published.
     """
     now = timezone.now()
+    optional_filters = {}
+
+    if language:
+        optional_filters['language'] = get_language() if \
+            language == CURRENT_LANGUAGE else language
+
     return queryset.filter(
         models.Q(start_publication__lte=now) |
         models.Q(start_publication=None),
         models.Q(end_publication__gt=now) |
         models.Q(end_publication=None),
-        status=PUBLISHED, sites=Site.objects.get_current())
+        status=PUBLISHED, sites=Site.objects.get_current(), **optional_filters)
 
 
-class EntryPublishedManager(models.Manager):
+class EntryPublishedLocalManager(models.Manager):
     """
     Manager to retrieve published entries.
     """
@@ -45,13 +56,13 @@ class EntryPublishedManager(models.Manager):
         Return published entries.
         """
         return entries_published(
-            super(EntryPublishedManager, self).get_queryset())
+            super(EntryPublishedLocalManager, self).get_queryset())
 
     def on_site(self):
         """
         Return entries published on current site.
         """
-        return super(EntryPublishedManager, self).get_queryset().filter(
+        return super(EntryPublishedLocalManager, self).get_queryset().filter(
             sites=Site.objects.get_current())
 
     def search(self, pattern):
@@ -92,11 +103,15 @@ class EntryRelatedPublishedManager(models.Manager):
     Manager to retrieve objects associated with published entries.
     """
 
-    def get_queryset(self):
+    def get_queryset(self, language=CURRENT_LANGUAGE):
         """
         Return a queryset containing published entries.
         """
         now = timezone.now()
+        optional_filters = {}
+        if language:
+            optional_filters['entries__language'] = get_language() if \
+                language == CURRENT_LANGUAGE else language
         return super(
             EntryRelatedPublishedManager, self).get_queryset().filter(
             models.Q(entries__start_publication__lte=now) |
@@ -104,5 +119,6 @@ class EntryRelatedPublishedManager(models.Manager):
             models.Q(entries__end_publication__gt=now) |
             models.Q(entries__end_publication=None),
             entries__status=PUBLISHED,
-            entries__sites=Site.objects.get_current()
+            entries__sites=Site.objects.get_current(),
+            **optional_filters
             ).distinct()

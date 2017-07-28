@@ -32,7 +32,7 @@ class EntryAdmin(admin.ModelAdmin):
     date_hierarchy = 'publication_date'
     fieldsets = (
         (_('Content'), {
-            'fields': (('title', 'status'), 'lead', 'content',)}),
+            'fields': (('title', 'status', 'language'), 'lead', 'content',)}),
         (_('Illustration'), {
             'fields': ('image', 'image_caption'),
             'classes': ('collapse', 'collapse-closed')}),

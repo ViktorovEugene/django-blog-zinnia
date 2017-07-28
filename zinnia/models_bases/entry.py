@@ -6,6 +6,7 @@ from django.db.models import Q
 from django.utils import timezone
 from django.utils.text import Truncator
 from django.utils.html import strip_tags
+from django.conf import settings
 from django.contrib.sites.models import Site
 from django.template.defaultfilters import slugify
 from django.utils.translation import ugettext_lazy as _
@@ -28,7 +29,7 @@ from zinnia.settings import AUTO_CLOSE_COMMENTS_AFTER
 from zinnia.settings import AUTO_CLOSE_PINGBACKS_AFTER
 from zinnia.settings import AUTO_CLOSE_TRACKBACKS_AFTER
 from zinnia.managers import entries_published
-from zinnia.managers import EntryPublishedManager
+from zinnia.managers import EntryPublishedLocalManager
 from zinnia.managers import DRAFT, HIDDEN, PUBLISHED
 from zinnia.url_shortener import get_url_shortener
 
@@ -44,6 +45,9 @@ class CoreEntry(models.Model):
                       (HIDDEN, _('hidden')),
                       (PUBLISHED, _('published')))
 
+    CMS_LANGUAGES = [('', '---'), ]
+    CMS_LANGUAGES.extend(settings.LANGUAGES)
+
     title = models.CharField(
         _('title'), max_length=255)
 
@@ -55,6 +59,11 @@ class CoreEntry(models.Model):
     status = models.IntegerField(
         _('status'), db_index=True,
         choices=STATUS_CHOICES, default=DRAFT)
+
+    language = models.CharField(
+        _('language'), db_index=True, max_length=20, blank=True,
+        choices=CMS_LANGUAGES, default=CMS_LANGUAGES[0][0]
+    )
 
     publication_date = models.DateTimeField(
         _('publication date'),
@@ -85,7 +94,7 @@ class CoreEntry(models.Model):
         _('last update'), default=timezone.now)
 
     objects = models.Manager()
-    published = EntryPublishedManager()
+    published = EntryPublishedLocalManager()
 
     @property
     def is_actual(self):
