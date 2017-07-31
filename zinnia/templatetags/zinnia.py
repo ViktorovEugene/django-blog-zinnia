@@ -42,6 +42,7 @@ from ..context import get_context_first_object
 from ..context import get_context_first_matching_object
 from ..context import get_context_loop_positions
 from ..templates import loop_template_list
+from .overrides import url
 
 
 WIDONT_REGEXP = re.compile(
@@ -52,6 +53,10 @@ END_PUNCTUATION_WIDONT_REGEXP = re.compile(
     r'\s+([?!]+\s*)$')
 
 register = Library()
+
+# Overrides the default Django's `url` tag to resolve current app
+# even in included templates
+register.tag(url)
 
 
 @register.inclusion_tag('zinnia/tags/dummy.html', takes_context=True)
