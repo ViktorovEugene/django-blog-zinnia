@@ -9,9 +9,9 @@ _thread_locals = local()
 
 
 def get_current_apps():
-    app = getattr(_thread_locals, 'apps', None)
+    apps = getattr(_thread_locals, 'apps', None)
 
-    return app
+    return apps
 
 
 class ZinniaCurrentAppMiddleware(MiddlewareMixin):

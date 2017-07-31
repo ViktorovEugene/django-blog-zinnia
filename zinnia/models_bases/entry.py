@@ -3,6 +3,7 @@ import os
 
 from django.db import models
 from django.db.models import Q
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.text import Truncator
 from django.utils.html import strip_tags
@@ -20,6 +21,7 @@ from tagging.utils import parse_tag_input
 from zinnia.flags import PINGBACK
 from zinnia.flags import TRACKBACK
 from zinnia.markups import html_format
+from zinnia.middleware.zinnia_app import get_current_apps
 from zinnia.preview import HTMLPreview
 from zinnia.settings import UPLOAD_TO
 from zinnia.settings import ENTRY_DETAIL_TEMPLATES
@@ -176,7 +178,6 @@ class CoreEntry(models.Model):
         self.last_update = timezone.now()
         super(CoreEntry, self).save(*args, **kwargs)
 
-    @models.permalink
     def get_absolute_url(self):
         """
         Builds and returns the entry's URL based on
@@ -185,11 +186,19 @@ class CoreEntry(models.Model):
         publication_date = self.publication_date
         if timezone.is_aware(publication_date):
             publication_date = timezone.localtime(publication_date)
-        return ('zinnia:entry_detail', (), {
-            'year': publication_date.strftime('%Y'),
-            'month': publication_date.strftime('%m'),
-            'day': publication_date.strftime('%d'),
-            'slug': self.slug})
+
+        current_apps = get_current_apps()
+        if current_apps:
+            current_apps = ':'.join(current_apps)
+
+        return reverse(
+            'zinnia:entry_detail', kwargs={
+                'year': publication_date.strftime('%Y'),
+                'month': publication_date.strftime('%m'),
+                'day': publication_date.strftime('%d'),
+                'slug': self.slug},
+            current_app=current_apps
+            )
 
     def __str__(self):
         return '%s: %s' % (self.title, self.get_status_display())

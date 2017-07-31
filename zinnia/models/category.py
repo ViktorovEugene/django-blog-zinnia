@@ -1,5 +1,6 @@
 """Category model for Zinnia"""
 from django.db import models
+from django.urls import reverse
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import python_2_unicode_compatible
 
@@ -9,6 +10,7 @@ from mptt.managers import TreeManager
 
 from zinnia.managers import entries_published
 from zinnia.managers import EntryRelatedPublishedManager
+from zinnia.middleware.zinnia_app import get_current_apps
 
 
 @python_2_unicode_compatible
@@ -55,13 +57,16 @@ class Category(MPTTModel):
                 [self.slug])
         return self.slug
 
-    @models.permalink
     def get_absolute_url(self):
         """
         Builds and returns the category's URL
         based on his tree path.
         """
-        return ('zinnia:category_detail', (self.tree_path,))
+        current_apps = get_current_apps()
+        if current_apps:
+            current_apps = ':'.join(current_apps)
+        return reverse('zinnia:category_detail', args=(self.tree_path,),
+                       current_app=current_apps)
 
     def __str__(self):
         return self.title
