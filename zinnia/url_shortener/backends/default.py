@@ -3,6 +3,7 @@ import string
 
 from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
+from zinnia.middleware.zinnia_app import current_app_arg
 
 from zinnia.settings import PROTOCOL
 
@@ -26,4 +27,5 @@ def backend(entry):
     """
     return '%s://%s%s' % (
         PROTOCOL, Site.objects.get_current().domain,
-        reverse('zinnia:entry_shortlink', args=[base36(entry.pk)]))
+        reverse('zinnia:entry_shortlink', args=[base36(entry.pk)],
+                current_app=current_app_arg()))

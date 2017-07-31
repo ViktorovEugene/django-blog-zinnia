@@ -1,6 +1,9 @@
 """Feeds for Zinnia"""
 import os
 from mimetypes import guess_type
+
+from zinnia.middleware.zinnia_app import current_app_arg
+
 try:
     from urllib.parse import urljoin
 except ImportError:  # Python 2
@@ -173,7 +176,8 @@ class LastEntries(EntryFeed):
         """
         URL of last entries.
         """
-        return reverse('zinnia:entry_archive_index')
+        return reverse('zinnia:entry_archive_index',
+                       current_app=current_app_arg())
 
     def items(self):
         """
@@ -293,7 +297,8 @@ class TagEntries(EntryFeed):
         """
         URL of the tag.
         """
-        return reverse('zinnia:tag_detail', args=[obj.name])
+        return reverse('zinnia:tag_detail', args=[obj.name],
+                       current_app=current_app_arg())
 
     def get_title(self, obj):
         """
@@ -333,7 +338,8 @@ class SearchEntries(EntryFeed):
         """
         URL of the search request.
         """
-        return '%s?pattern=%s' % (reverse('zinnia:entry_search'), obj)
+        return '%s?pattern=%s' % (reverse('zinnia:entry_search',
+                                          current_app=current_app_arg()), obj,)
 
     def get_title(self, obj):
         """
@@ -405,7 +411,8 @@ class LastDiscussions(DiscussionFeed):
         """
         URL of last discussions.
         """
-        return reverse('zinnia:entry_archive_index')
+        return reverse('zinnia:entry_archive_index',
+                       current_app=current_app_arg())
 
     def get_title(self, obj):
         """

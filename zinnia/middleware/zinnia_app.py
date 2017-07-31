@@ -14,12 +14,19 @@ def get_current_apps():
     return apps
 
 
+def current_app_arg(default=None):
+    apps = get_current_apps()
+    if apps:
+        return ':'.join(apps)
+    return default
+
+
 class ZinniaCurrentAppMiddleware(MiddlewareMixin):
     def process_view(self, request, *args, **kwargs):
         """
         Send broken link emails for relevant 404 NOT FOUND responses.
         """
-        from zinnia.models_bases.entry import APPS
+        from zinnia.managers import APPS
         namespaces = set(request.resolver_match.namespaces) & set(APPS)
         if namespaces:
             _thread_locals.apps = namespaces

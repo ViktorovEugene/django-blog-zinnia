@@ -8,6 +8,7 @@ from django.utils.timezone import is_aware
 from django.utils.timezone import localtime
 from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext as _
+from zinnia.middleware.zinnia_app import current_app_arg
 
 
 class Crumb(object):
@@ -25,7 +26,7 @@ def year_crumb(date):
     """
     year = date.strftime('%Y')
     return Crumb(year, reverse('zinnia:entry_archive_year',
-                               args=[year]))
+                               args=[year], current_app=current_app_arg()))
 
 
 def month_crumb(date):
@@ -36,7 +37,8 @@ def month_crumb(date):
     month = date.strftime('%m')
     month_text = format(date, 'F').capitalize()
     return Crumb(month_text, reverse('zinnia:entry_archive_month',
-                                     args=[year, month]))
+                                     args=[year, month],
+                                     current_app=current_app_arg()))
 
 
 def day_crumb(date):
@@ -47,7 +49,8 @@ def day_crumb(date):
     month = date.strftime('%m')
     day = date.strftime('%d')
     return Crumb(day, reverse('zinnia:entry_archive_day',
-                              args=[year, month, day]))
+                              args=[year, month, day],
+                              current_app=current_app_arg()))
 
 
 def entry_breadcrumbs(entry):
@@ -61,13 +64,13 @@ def entry_breadcrumbs(entry):
             day_crumb(date), Crumb(entry.title)]
 
 MODEL_BREADCRUMBS = {'Tag': lambda x: [Crumb(_('Tags'),
-                                             reverse('zinnia:tag_list')),
+                                             reverse('zinnia:tag_list', current_app=current_app_arg())),
                                        Crumb(x.name)],
                      'Author': lambda x: [Crumb(_('Authors'),
-                                                reverse('zinnia:author_list')),
+                                                reverse('zinnia:author_list', current_app=current_app_arg())),
                                           Crumb(x.__str__())],
                      'Category': lambda x: [Crumb(
-                         _('Categories'), reverse('zinnia:category_list'))] +
+                         _('Categories'), reverse('zinnia:category_list', current_app=current_app_arg()))] +
                      [Crumb(anc.__str__(), anc.get_absolute_url())
                       for anc in x.get_ancestors()] + [Crumb(x.title)],
                      'Entry': entry_breadcrumbs}
@@ -105,7 +108,8 @@ def retrieve_breadcrumbs(path, model_instance, root_name=''):
     based of the model's url handled by Zinnia.
     """
     breadcrumbs = []
-    zinnia_root_path = reverse('zinnia:entry_archive_index')
+    zinnia_root_path = reverse('zinnia:entry_archive_index',
+                               current_app=current_app_arg())
 
     if root_name:
         breadcrumbs.append(Crumb(root_name, zinnia_root_path))

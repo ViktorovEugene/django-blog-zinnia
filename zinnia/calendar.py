@@ -9,6 +9,7 @@ from django.utils.dates import WEEKDAYS_ABBR
 from django.utils.formats import get_format
 from django.utils.formats import date_format
 from django.core.urlresolvers import reverse
+from zinnia.middleware.zinnia_app import current_app_arg
 
 from zinnia.models.entry import Entry
 
@@ -38,7 +39,9 @@ class Calendar(HTMLCalendar):
             archive_day_url = reverse('zinnia:entry_archive_day',
                                       args=[day_date.strftime('%Y'),
                                             day_date.strftime('%m'),
-                                            day_date.strftime('%d')])
+                                            day_date.strftime('%d')],
+                                      current_app=current_app_arg()
+                                      )
             return '<td class="%s entry"><a href="%s" '\
                    'class="archives">%d</a></td>' % (
                        self.cssclasses[weekday], archive_day_url, day)
@@ -71,16 +74,18 @@ class Calendar(HTMLCalendar):
             previous_content = '<a href="%s" class="previous-month">%s</a>' % (
                 reverse('zinnia:entry_archive_month', args=[
                     previous_month.strftime('%Y'),
-                    previous_month.strftime('%m')]),
+                    previous_month.strftime('%m')],
+                    current_app=current_app_arg()),
                 date_format(previous_month, 'YEAR_MONTH_FORMAT'))
         else:
             previous_content = '&nbsp;'
 
         if next_month:
             next_content = '<a href="%s" class="next-month">%s</a>' % (
-                reverse('zinnia:entry_archive_month', args=[
-                    next_month.strftime('%Y'),
-                    next_month.strftime('%m')]),
+                reverse('zinnia:entry_archive_month',
+                        args=[next_month.strftime('%Y'),
+                              next_month.strftime('%m')],
+                        current_app=current_app_arg()),
                 date_format(next_month, 'YEAR_MONTH_FORMAT'))
         else:
             next_content = '&nbsp;'

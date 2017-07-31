@@ -10,7 +10,7 @@ from mptt.managers import TreeManager
 
 from zinnia.managers import entries_published
 from zinnia.managers import EntryRelatedPublishedManager
-from zinnia.middleware.zinnia_app import get_current_apps
+from zinnia.middleware.zinnia_app import current_app_arg
 
 
 @python_2_unicode_compatible
@@ -62,11 +62,8 @@ class Category(MPTTModel):
         Builds and returns the category's URL
         based on his tree path.
         """
-        current_apps = get_current_apps()
-        if current_apps:
-            current_apps = ':'.join(current_apps)
         return reverse('zinnia:category_detail', args=(self.tree_path,),
-                       current_app=current_apps)
+                       current_app=current_app_arg())
 
     def __str__(self):
         return self.title

@@ -1,5 +1,8 @@
 """XML-RPC methods of Zinnia metaWeblog API"""
 from datetime import datetime
+
+from zinnia.middleware.zinnia_app import current_app_arg
+
 try:
     from xmlrpc.client import Fault
     from xmlrpc.client import DateTime
@@ -60,7 +63,8 @@ def blog_structure(site):
             'blogName': site.name,
             'url': '%s://%s%s' % (
                 PROTOCOL, site.domain,
-                reverse('zinnia:entry_archive_index'))}
+                reverse('zinnia:entry_archive_index',
+                        current_app=current_app_arg()))}
 
 
 def user_structure(user, site):
@@ -103,7 +107,8 @@ def category_structure(category, site):
                 category.get_absolute_url()),
             'rssUrl': '%s://%s%s' % (
                 PROTOCOL, site.domain,
-                reverse('zinnia:category_feed', args=[category.tree_path])),
+                reverse('zinnia:category_feed', args=[category.tree_path],
+                        current_app=current_app_arg())),
             # Useful Wordpress Extensions
             'categoryId': category.pk,
             'parentId': category.parent and category.parent.pk or 0,
@@ -121,10 +126,12 @@ def tag_structure(tag, site):
             'slug': tag.name,
             'html_url': '%s://%s%s' % (
                 PROTOCOL, site.domain,
-                reverse('zinnia:tag_detail', args=[tag.name])),
+                reverse('zinnia:tag_detail', args=[tag.name],
+                        current_app=current_app_arg())),
             'rss_url': '%s://%s%s' % (
                 PROTOCOL, site.domain,
-                reverse('zinnia:tag_feed', args=[tag.name]))
+                reverse('zinnia:tag_feed', args=[tag.name],
+                        current_app=current_app_arg()))
             }
 
 

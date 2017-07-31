@@ -6,6 +6,7 @@ from django.core.urlresolvers import reverse
 
 from tagging.models import Tag
 from tagging.models import TaggedItem
+from zinnia.middleware.zinnia_app import current_app_arg
 
 from zinnia.models.entry import Entry
 from zinnia.models.author import Author
@@ -145,4 +146,5 @@ class TagSitemap(EntryRelatedSitemap):
         """
         Return URL of the tag.
         """
-        return reverse('zinnia:tag_detail', args=[item.name])
+        return reverse('zinnia:tag_detail', args=[item.name],
+                       current_app=current_app_arg())

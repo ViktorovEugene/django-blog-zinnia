@@ -21,7 +21,7 @@ from tagging.utils import parse_tag_input
 from zinnia.flags import PINGBACK
 from zinnia.flags import TRACKBACK
 from zinnia.markups import html_format
-from zinnia.middleware.zinnia_app import get_current_apps
+from zinnia.middleware.zinnia_app import current_app_arg
 from zinnia.preview import HTMLPreview
 from zinnia.settings import UPLOAD_TO
 from zinnia.settings import ENTRY_DETAIL_TEMPLATES
@@ -31,7 +31,7 @@ from zinnia.settings import AUTO_CLOSE_PINGBACKS_AFTER
 from zinnia.settings import AUTO_CLOSE_TRACKBACKS_AFTER
 from zinnia.managers import entries_published
 from zinnia.managers import EntryPublishedManager
-from zinnia.managers import DRAFT, HIDDEN, PUBLISHED, PRESS, BLOG, APPS
+from zinnia.managers import DRAFT, HIDDEN, PUBLISHED, PRESS, BLOG
 from zinnia.url_shortener import get_url_shortener
 
 
@@ -187,17 +187,13 @@ class CoreEntry(models.Model):
         if timezone.is_aware(publication_date):
             publication_date = timezone.localtime(publication_date)
 
-        current_apps = get_current_apps()
-        if current_apps:
-            current_apps = ':'.join(current_apps)
-
         return reverse(
             'zinnia:entry_detail', kwargs={
                 'year': publication_date.strftime('%Y'),
                 'month': publication_date.strftime('%m'),
                 'day': publication_date.strftime('%d'),
                 'slug': self.slug},
-            current_app=current_apps
+            current_app=current_app_arg()
             )
 
     def __str__(self):

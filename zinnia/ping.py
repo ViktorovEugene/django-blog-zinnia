@@ -2,6 +2,9 @@
 import socket
 import threading
 from logging import getLogger
+
+from zinnia.middleware.zinnia_app import current_app_arg
+
 try:
     from urllib.request import urlopen
     from urllib.parse import urlsplit
@@ -31,9 +34,11 @@ class URLRessources(object):
         self.current_site = Site.objects.get_current()
         self.site_url = '%s://%s' % (PROTOCOL, self.current_site.domain)
         self.blog_url = '%s%s' % (self.site_url,
-                                  reverse('zinnia:entry_archive_index'))
+                                  reverse('zinnia:entry_archive_index',
+                                          current_app=current_app_arg()))
         self.blog_feed = '%s%s' % (self.site_url,
-                                   reverse('zinnia:entry_feed'))
+                                   reverse('zinnia:entry_feed',
+                                           current_app=current_app_arg()))
 
 
 class DirectoryPinger(threading.Thread):

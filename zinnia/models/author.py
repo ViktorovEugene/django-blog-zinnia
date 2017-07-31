@@ -7,7 +7,7 @@ from django.urls import reverse
 
 from zinnia.managers import entries_published
 from zinnia.managers import EntryRelatedPublishedManager
-from zinnia.middleware.zinnia_app import get_current_apps
+from zinnia.middleware.zinnia_app import current_app_arg
 
 
 def safe_get_user_model():
@@ -46,11 +46,8 @@ class Author(safe_get_user_model(),
         """
         Builds and returns the author's URL based on his username.
         """
-        current_apps = get_current_apps()
-        if current_apps:
-            current_apps = ':'.join(current_apps)
         return reverse('zinnia:author_detail', args=[self.get_username()],
-                       current_app=current_apps)
+                       current_app=current_app_arg())
 
     def __str__(self):
         """
