@@ -22,10 +22,10 @@ class URLNode(defaulttags.URLNode):
         view_name = self.view_name.resolve(context)
         try:
             current_app = context.get('request').current_app
-        except (KeyError, AttributeError):
+        except AttributeError:
             try:
                 current_app = context.get('request').resolver_match.namespace
-            except (KeyError, AttributeError):
+            except AttributeError:
                 current_app = None
         # Try to look up the URL. If it fails, raise NoReverseMatch unless the
         # {% url ... as var %} construct is used, in which case return nothing.
