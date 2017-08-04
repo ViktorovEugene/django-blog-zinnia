@@ -22,6 +22,24 @@ from zinnia.admin.forms import EntryAdminForm
 from zinnia.admin.filters import AuthorListFilter
 from zinnia.admin.filters import CategoryListFilter
 from zinnia.comparison import EntryPublishedVectorBuilder
+from zinnia.models_bases.entry import CoreEntry
+
+
+def get_lang_action(lang_choice_pair):
+    def set_language(modeladmin, request, queryset):
+
+        queryset.update(language=lang_choice_pair[0])
+        modeladmin.message_user(request, _(
+            'The selected entries are now marked as "%s" '
+            'language') % lang_choice_pair[1])
+
+    set_language.__name__ += '_' + lang_choice_pair[0].lower()
+    set_language.short_description = _('Set selected entries as %s' %
+                                       lang_choice_pair[1])
+
+    return set_language
+
+LANG_ACTIONS = [get_lang_action(choice) for choice in CoreEntry.CMS_LANGUAGES]
 
 
 class EntryAdmin(admin.ModelAdmin):
@@ -55,7 +73,7 @@ class EntryAdmin(admin.ModelAdmin):
             'classes': ('collapse', 'collapse-closed')}),
         (None, {'fields': ('categories', 'tags', 'slug')}))
     list_filter = (CategoryListFilter, AuthorListFilter,
-                   'publication_date', 'sites', 'status')
+                   'publication_date', 'sites', 'status', 'language')
     list_display = ('get_title', 'language', 'get_authors', 'get_categories',
                     'get_tags', 'get_sites', 'get_is_visible', 'featured',
                     'get_short_url', 'publication_date')
@@ -67,7 +85,7 @@ class EntryAdmin(admin.ModelAdmin):
     actions = ['make_mine', 'make_published', 'make_hidden',
                'close_comments', 'close_pingbacks', 'close_trackbacks',
                'ping_directories', 'put_on_top',
-               'mark_featured', 'unmark_featured']
+               'mark_featured', 'unmark_featured', *LANG_ACTIONS]
     actions_on_top = True
     actions_on_bottom = True
 
