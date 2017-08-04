@@ -11,6 +11,7 @@ from django.contrib.sites.models import Site
 from django.template.defaultfilters import slugify
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import python_2_unicode_compatible
+from django.utils.translation import get_language
 
 import django_comments as comments
 from django_comments.models import CommentFlag
@@ -62,7 +63,7 @@ class CoreEntry(models.Model):
 
     language = models.CharField(
         _('language'), db_index=True, max_length=20, blank=True,
-        choices=CMS_LANGUAGES, default=CMS_LANGUAGES[0][0]
+        choices=CMS_LANGUAGES, default=get_language
     )
 
     publication_date = models.DateTimeField(
