@@ -56,7 +56,7 @@ class EntryAdmin(admin.ModelAdmin):
         (None, {'fields': ('categories', 'tags', 'slug')}))
     list_filter = (CategoryListFilter, AuthorListFilter,
                    'publication_date', 'sites', 'status')
-    list_display = ('get_title', 'get_authors', 'get_categories',
+    list_display = ('get_title', 'language', 'get_authors', 'get_categories',
                     'get_tags', 'get_sites', 'get_is_visible', 'featured',
                     'get_short_url', 'publication_date')
     radio_fields = {'content_template': admin.VERTICAL,
@@ -116,8 +116,12 @@ class EntryAdmin(admin.ModelAdmin):
         """
         try:
             return format_html_join(
-                ', ', '<a href="{}" target="blank">{}</a>',
-                [(category.get_absolute_url(), category.title)
+                ', ', '<a href="{}" target="blank" title="{}">{}</a>',
+                [(category.get_absolute_url(),
+                  category.title,
+                  category.title if len(category.title) <= 10 else
+                  category.title[:8] + '...'
+                  )
                  for category in entry.categories.all()])
         except NoReverseMatch:
             return ', '.join([conditional_escape(category.title)

@@ -6,6 +6,8 @@ from django.contrib.sites.models import Site
 from zinnia.settings import SEARCH_FIELDS
 from django.utils.translation import get_language
 
+from zinnia.middleware.zinnia_app import current_apps, current_namespaces
+
 DRAFT = 0
 HIDDEN = 1
 PUBLISHED = 2
@@ -27,23 +29,27 @@ def tags_published():
 CURRENT_LANGUAGE = 'current-language'
 
 
+def get_optional_lang_arg(arg_name, language):
+    optional_filters = {}
+    if language and (current_namespaces() or current_apps()):
+        optional_filters[arg_name] = get_language() \
+            if language == CURRENT_LANGUAGE else language
+
+    return optional_filters
+
+
 def entries_published(queryset, language=CURRENT_LANGUAGE):
     """
     Return only the entries published.
     """
     now = timezone.now()
-    optional_filters = {}
-
-    if language:
-        optional_filters['language'] = get_language() if \
-            language == CURRENT_LANGUAGE else language
-
     return queryset.filter(
         models.Q(start_publication__lte=now) |
         models.Q(start_publication=None),
         models.Q(end_publication__gt=now) |
         models.Q(end_publication=None),
-        status=PUBLISHED, sites=Site.objects.get_current(), **optional_filters)
+        status=PUBLISHED, sites=Site.objects.get_current(),
+        **get_optional_lang_arg('language', language))
 
 
 class EntryPublishedLocalManager(models.Manager):
@@ -108,10 +114,6 @@ class EntryRelatedPublishedManager(models.Manager):
         Return a queryset containing published entries.
         """
         now = timezone.now()
-        optional_filters = {}
-        if language:
-            optional_filters['entries__language'] = get_language() if \
-                language == CURRENT_LANGUAGE else language
         return super(
             EntryRelatedPublishedManager, self).get_queryset().filter(
             models.Q(entries__start_publication__lte=now) |
@@ -120,5 +122,5 @@ class EntryRelatedPublishedManager(models.Manager):
             models.Q(entries__end_publication=None),
             entries__status=PUBLISHED,
             entries__sites=Site.objects.get_current(),
-            **optional_filters
+            **get_optional_lang_arg('entries__language', language)
             ).distinct()
