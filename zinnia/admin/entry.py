@@ -22,6 +22,24 @@ from zinnia.admin.forms import EntryAdminForm
 from zinnia.admin.filters import AuthorListFilter
 from zinnia.admin.filters import CategoryListFilter
 from zinnia.comparison import EntryPublishedVectorBuilder
+from zinnia.models_bases.entry import CoreEntry
+
+
+def get_app_action(app_choice_pair, index=0):
+    def set_app(modeladmin, request, queryset):
+        queryset.update(app=app_choice_pair[0])
+        modeladmin.message_user(request, _(
+            'The selected entries are now related to "%s" '
+            'application.') % app_choice_pair[1])
+
+    set_app.__name__ += '_%d' % index
+    set_app.short_description = _('Set "%s" app for the selected entries' %
+                                  app_choice_pair[1])
+
+    return set_app
+
+APP_ACTIONS = [get_app_action(choice, index)
+               for index, choice in enumerate(CoreEntry.APP_CHOICES)]
 
 
 class EntryAdmin(admin.ModelAdmin):
@@ -55,8 +73,8 @@ class EntryAdmin(admin.ModelAdmin):
             'classes': ('collapse', 'collapse-closed')}),
         (None, {'fields': ('categories', 'tags', 'slug')}))
     list_filter = (CategoryListFilter, AuthorListFilter,
-                   'publication_date', 'sites', 'status')
-    list_display = ('get_title', 'get_authors', 'get_categories',
+                   'publication_date', 'sites', 'status', 'app')
+    list_display = ('get_title', 'app', 'get_authors', 'get_categories',
                     'get_tags', 'get_sites', 'get_is_visible', 'featured',
                     'get_short_url', 'publication_date')
     radio_fields = {'content_template': admin.VERTICAL,
@@ -67,7 +85,7 @@ class EntryAdmin(admin.ModelAdmin):
     actions = ['make_mine', 'make_published', 'make_hidden',
                'close_comments', 'close_pingbacks', 'close_trackbacks',
                'ping_directories', 'put_on_top',
-               'mark_featured', 'unmark_featured']
+               'mark_featured', 'unmark_featured', *APP_ACTIONS]
     actions_on_top = True
     actions_on_bottom = True
 
@@ -116,8 +134,12 @@ class EntryAdmin(admin.ModelAdmin):
         """
         try:
             return format_html_join(
-                ', ', '<a href="{}" target="blank">{}</a>',
-                [(category.get_absolute_url(), category.title)
+                ', ', '<a href="{}" target="blank" title="{}">{}</a>',
+                [(category.get_absolute_url(),
+                  category.title,
+                  category.title if len(category.title) <= 10 else
+                  category.title[:8] + '...'
+                  )
                  for category in entry.categories.all()])
         except NoReverseMatch:
             return ', '.join([conditional_escape(category.title)
