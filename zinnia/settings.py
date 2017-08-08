@@ -1,8 +1,28 @@
 """Settings of Zinnia"""
 from django.conf import settings
+from django.core.exceptions import ValidationError
 
 from mots_vides import stop_words
 
+
+APPLICATION_INSTANCE_CHOICES = getattr(settings,
+                                       'ZINNIA_APPLICATION_INSTANCE_CHOICES',
+                                       (('', '-----'),))
+
+_INSTANCE_CHOICE_MAX_LENGTH = 50
+
+APPLICATION_INSTANCES = () if not APPLICATION_INSTANCE_CHOICES else \
+    list(filter(None, next(zip(*APPLICATION_INSTANCE_CHOICES))))
+
+if APPLICATION_INSTANCES \
+        and max(len(i) for i in APPLICATION_INSTANCES) > \
+                _INSTANCE_CHOICE_MAX_LENGTH:
+    raise ValidationError(
+        "Ensure that there are no choices with the length more than %(max)"
+        "characters.",
+        code='max_length',
+        params={'max': _INSTANCE_CHOICE_MAX_LENGTH}
+    )
 
 PING_DIRECTORIES = getattr(settings, 'ZINNIA_PING_DIRECTORIES',
                            ('http://django-blog-zinnia.com/xmlrpc/',))

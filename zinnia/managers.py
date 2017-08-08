@@ -10,10 +10,6 @@ DRAFT = 0
 HIDDEN = 1
 PUBLISHED = 2
 
-PRESS = 'press'
-BLOG = 'blog'
-APPS = (PRESS, BLOG)
-
 
 def tags_published():
     """

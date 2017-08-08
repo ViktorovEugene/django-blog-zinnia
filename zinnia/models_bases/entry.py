@@ -29,9 +29,11 @@ from zinnia.settings import ENTRY_CONTENT_TEMPLATES
 from zinnia.settings import AUTO_CLOSE_COMMENTS_AFTER
 from zinnia.settings import AUTO_CLOSE_PINGBACKS_AFTER
 from zinnia.settings import AUTO_CLOSE_TRACKBACKS_AFTER
+from zinnia.settings import APPLICATION_INSTANCE_CHOICES, \
+    _INSTANCE_CHOICE_MAX_LENGTH
 from zinnia.managers import entries_published
 from zinnia.managers import EntryPublishedManager
-from zinnia.managers import DRAFT, HIDDEN, PUBLISHED, PRESS, BLOG
+from zinnia.managers import DRAFT, HIDDEN, PUBLISHED
 from zinnia.url_shortener import get_url_shortener
 
 
@@ -46,9 +48,7 @@ class CoreEntry(models.Model):
                       (HIDDEN, _('hidden')),
                       (PUBLISHED, _('published')))
 
-    APP_CHOICES = (('', '-----'),
-                   (PRESS, _('Press')),
-                   (BLOG, _('Blog')))
+    APP_CHOICES = APPLICATION_INSTANCE_CHOICES
 
     title = models.CharField(
         _('title'), max_length=255)
@@ -63,10 +63,9 @@ class CoreEntry(models.Model):
         choices=STATUS_CHOICES, default=DRAFT)
 
     app = models.CharField(
-        _('application'), db_index=True,
-        choices=APP_CHOICES, default='', blank=True,
-        max_length=max(len(i) for i in next(zip(*APP_CHOICES)))
-    )
+        _('application'), db_index=True, choices=APP_CHOICES,
+        default=APP_CHOICES[0][0], blank=True,
+        max_length=_INSTANCE_CHOICE_MAX_LENGTH)
 
     publication_date = models.DateTimeField(
         _('publication date'),
