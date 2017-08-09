@@ -30,7 +30,7 @@ class ZinniaCurrentAppMiddleware(MiddlewareMixin):
         if namespaces:
             _thread_locals.apps = namespaces
         else:
-            _thread_locals.app = None
+            _thread_locals.apps = None
 
 if not _application_instances_set:
     del ZinniaCurrentAppMiddleware.process_view
