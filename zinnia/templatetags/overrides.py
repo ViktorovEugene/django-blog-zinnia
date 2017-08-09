@@ -10,6 +10,8 @@ from django.utils.html import conditional_escape
 
 from django.template.base import (TemplateSyntaxError, kwarg_re, )
 
+from zinnia.middleware.zinnia_app import current_app_arg
+
 
 class URLNode(defaulttags.URLNode):
     def render(self, context):
@@ -26,7 +28,10 @@ class URLNode(defaulttags.URLNode):
             try:
                 current_app = context.get('request').resolver_match.namespace
             except AttributeError:
-                current_app = None
+                if view_name.startswith('zinnia:'):
+                    current_app = current_app_arg()
+                else:
+                    current_app = None
         # Try to look up the URL. If it fails, raise NoReverseMatch unless the
         # {% url ... as var %} construct is used, in which case return nothing.
         url = ''
