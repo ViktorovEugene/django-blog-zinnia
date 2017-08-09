@@ -1,4 +1,5 @@
 {% load i18n %}
+{% load url from zinnia %}
 <ul class="{% if not tags %}no-{% endif %}tag-cloud">
   {% for tag in tags %}
   <li>

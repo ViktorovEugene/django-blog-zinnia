@@ -1,4 +1,5 @@
 {% load i18n %}
+{% load url from zinnia %}
 <ul class="{% if not archives %}no-{% endif %}archives-entries">
   {% for date in archives %}
   <li>

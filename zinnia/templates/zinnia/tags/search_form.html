@@ -1,5 +1,6 @@
 {% load i18n %}
 {% load staticfiles %}
+{% load url from zinnia %}
 <form method="get" id="searchform" action="{% url 'zinnia:entry_search' %}">
   <p>
     <input type="text" name="pattern" id="searchbox" placeholder="{% trans "Keywords..." %}" {% if pattern %}value="{{ pattern }}"{% endif %} />
